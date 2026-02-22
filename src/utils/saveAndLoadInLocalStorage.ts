@@ -7,7 +7,7 @@ export const saveGameDataInLocal = (todaysNo: number, answerList: string[][]) =>
     localStorage.setItem('gameData', JSON.stringify(gameData));
   }
 
-  export const loadGameDataInLocal = (todaysNo: number): string[][] => {
+  export const loadGameDataInLocal = (_todaysNo: number): string[][] => {
     // const json_data = localStorage.getItem('gameData');
 
     // // ローカルストレージにデータがある場合
