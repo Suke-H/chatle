@@ -9,7 +9,7 @@ import { AlphabetMatch } from "./interfaces/AlphabetMatch";
 import { GameState } from "./types/GameState";
 
 import { pushedEnterProcess } from "./game_logics/pushedEnterProcess";
-import { getTodaysWord } from "./utils/getTodaysWord";
+import { getStaticTodaysWord } from "./utils/getStaticTodaysWord";
 import { makeGameResultText } from "./utils/makeGameResultText";
 
 import { saveGameData, loadGameData, LoadDataSetters } from "./load/saveAndLoad";
@@ -63,7 +63,7 @@ export const App = (): JSX.Element => {
   // 初回レンダリング時
   useEffect(() => {
     const fetchData = async () => {
-      await getTodaysWord(setCorrectAnswer, setTodaysNo);
+      getStaticTodaysWord(setCorrectAnswer, setTodaysNo);
     };
   
     fetchData();
