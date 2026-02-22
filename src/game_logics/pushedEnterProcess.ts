@@ -1,6 +1,5 @@
 import { GameState } from "../types/GameState";
 
-import { checkWordValidity } from "./checkWordValidity";
 import { checkWordMatch } from "./checkWordMatch";
 import { checkClear } from "./checkClear";
 
@@ -15,10 +14,6 @@ export const pushedEnterProcess = async (
   setAlphabetMatch: React.Dispatch<React.SetStateAction<AlphabetMatch>>,
   setGameState: React.Dispatch<React.SetStateAction<GameState>>
 ): Promise<boolean> => {
-  // 単語の妥当性判定
-  const isValid = await checkWordValidity(answerList, round);
-  if (!isValid) return false;
-
   // 単語一致判定
   const tmpMatchList = checkWordMatch(
     correctAnswer,

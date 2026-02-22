@@ -104,27 +104,13 @@ export const App = (): JSX.Element => {
       setMatchList,
       setAlphabetMatch,
       setGameState
-    ).then((isValid) => {
-      /* 単語が妥当でない場合 */
-      if (!isValid) {
-        alert("データセットに存在しない単語です");
-
-        // 回答欄を1行リセット
-        setAnswerList((prevState) =>
-          prevState.map((row, index) =>
-            index === round - 1 ? Array(5).fill("") : row
-          )
-        );
-        setColumncnt(0); // 列番号を0にリセット
-      } else {
-
+    ).then(() => {
       /* 問題ない場合 */
-        setRound(round + 1); // 次の行へ移行
-        setColumncnt(0); // 列番号を0にリセット
+      setRound(round + 1); // 次の行へ移行
+      setColumncnt(0); // 列番号を0にリセット
 
-        // セーブ処理
-        saveGameData(todaysNo, answerList);
-      }
+      // セーブ処理
+      saveGameData(todaysNo, answerList);
     });
 
     setJudge(false);
