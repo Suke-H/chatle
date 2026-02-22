@@ -75,7 +75,7 @@ export const App = (): JSX.Element => {
 
     // debug
     // resetGameDataInLocal();
-  
+
     const loadDataSetters: LoadDataSetters = {
       setAnswerList: setAnswerList,
       setMatchList: setMatchList,
@@ -83,12 +83,12 @@ export const App = (): JSX.Element => {
       setRound: setRound,
       setAlphabetMatch: setAlphabetMatch,
     };
-  
+
     // todaysNo と correctAnswer が更新されていることを前提にロード処理を呼び出し
     loadGameData(todaysNo, correctAnswer, loadDataSetters);
     // ロード完了
     setIsLoadFinished(true);
-  
+
   }, [todaysNo]); // todaysNoが変更されたときに実行される
 
   // Enterを押した際

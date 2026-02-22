@@ -15,30 +15,24 @@ type appProps = {
   isLoadFinished: boolean;
 };
 
-type Props = {
-  round: number;
-  setRound: React.Dispatch<React.SetStateAction<number>>;
-  columncnt: number;
-  setColumncnt: React.Dispatch<React.SetStateAction<number>>;
-  answerList: string[][];
-  setAnswerList: React.Dispatch<React.SetStateAction<string[][]>>;
-  keyLayout: string[];
-  setJudge: React.Dispatch<React.SetStateAction<boolean>>;
-  alphabetMatch: AlphabetMatch;
-  gameState: GameState;
-  isLoadFinished: boolean;
-};
+const kanaGrid: string[][] = [
+  ["あ", "か", "さ", "た", "な", "は", "ま", "や", "ら", "わ"],
+  ["い", "き", "し", "ち", "に", "ひ", "み", "",   "り", ""  ],
+  ["う", "く", "す", "つ", "ぬ", "ふ", "む", "ゆ", "る", "を"],
+  ["え", "け", "せ", "て", "ね", "へ", "め", "",   "れ", ""  ],
+  ["お", "こ", "そ", "と", "の", "ほ", "も", "よ", "ろ", "ん"],
+];
 
-// アルファベットの判定リストを表す型をAlphabetMatchに変更
-const KeyboardRow = (props: Props) => {
+export const Keyboard = (props: appProps) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const updateDimensions = () => {
-    setWindowWidth(window.innerWidth);
-  };
+
   useEffect(() => {
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
+    const update = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
+
+  const isMobile = windowWidth < 600;
 
   const updateAnswer = (
     prevState: string[][],
@@ -46,208 +40,107 @@ const KeyboardRow = (props: Props) => {
     row: number,
     column: number
   ) => {
-    const tmpList = Array.from(prevState);
-    tmpList[row][column] = letter;
-
-    return tmpList;
+    const tmp = Array.from(prevState);
+    tmp[row][column] = letter;
+    return tmp;
   };
 
-  const handleClick = async (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    const letter = event.currentTarget.value;
-
-    // ゲームが終了している場合は何もしない
+  const handleClick = (letter: string) => {
     if (props.gameState !== "Playing") return;
-
-    // ロードが完了していない場合は何もしない
     if (!props.isLoadFinished) return;
 
-    // Enter入力
-    if (letter == "Enter") {
-      // 文字数不足
+    if (letter === "Enter") {
       if (props.columncnt < 5) {
         alert("文字数が足りません");
-      }
-
-      // 5文字入力した場合はフラグ送信（判定依頼）
-      else {
+      } else {
         props.setJudge(true);
       }
-    }
-
-    // Delete入力
-    else if (letter == "Delete") {
-      // 1文字以上入力
+    } else if (letter === "Delete") {
       if (props.columncnt > 0) {
-        props.setAnswerList((prevState) =>
-          updateAnswer(prevState, "", props.round - 1, props.columncnt - 1)
+        props.setAnswerList((prev) =>
+          updateAnswer(prev, "", props.round - 1, props.columncnt - 1)
         );
         props.setColumncnt((prev) => prev - 1);
       }
-    }
-
-    // アルファベット入力
-    else if (props.columncnt < 5) {
-      props.setAnswerList((prevState) =>
-        updateAnswer(prevState, letter, props.round - 1, props.columncnt)
+    } else if (props.columncnt < 5) {
+      props.setAnswerList((prev) =>
+        updateAnswer(prev, letter, props.round - 1, props.columncnt)
       );
       props.setColumncnt((prev) => prev + 1);
     }
   };
 
-  // キーボードのCSSスタイル
-  const keyboardStyle: React.CSSProperties = {
-    borderSpacing: windowWidth < 600 ? "3px 3px" : "6px 6px",
-    display: "flex",
-    justifyContent: "center",
+  const matchColors: Record<string, string> = {
+    NoUse:  "#d9d9d9",
+    Green:  "#538d4e",
+    Yellow: "#b59f3b",
+    Black:  "#3a3a3c",
   };
 
-  // ボタンのCSSスタイル
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: "d9d9d9",
+  const btnBase: React.CSSProperties = {
     borderRadius: "4px",
     border: "none",
-    width: windowWidth < 600 ? "30px" : "45px",
-    height: windowWidth < 600 ? "45px" : "60px",
-    fontSize: windowWidth < 600 ? "10px" : "13px",
+    width:    isMobile ? "28px" : "40px",
+    height:   isMobile ? "36px" : "48px",
+    fontSize: isMobile ? "11px" : "14px",
     fontWeight: "bold",
     cursor: "pointer",
+    color: "#fff",
   };
 
-  // EnterとDeleteのCSSスタイル
-  // buttonStyleとの差分のみ記述
-  const enterAndDeleteButtonStyle: React.CSSProperties = {
-    ...buttonStyle,
-    width: windowWidth < 600 ? "50px" : "70px",
+  const getKanaStyle = (key: string): React.CSSProperties => ({
+    ...btnBase,
+    backgroundColor: matchColors[props.alphabetMatch[key] ?? "NoUse"],
+  });
+
+  const actionBtnStyle: React.CSSProperties = {
+    ...btnBase,
+    width:    isMobile ? "48px" : "64px",
+    fontSize: isMobile ? "10px" : "12px",
+    backgroundColor: "#818384",
   };
 
-  // AlphabetMatchの結果に基づくスタイル
-  const matchStyles: Record<string, React.CSSProperties> = {
-    NoUse: {}, // NoUseはデフォルトスタイルを使用
-    Green: { backgroundColor: "538d4e" },
-    Yellow: { backgroundColor: "b59f3b" },
-    Black: { backgroundColor: "3a3a3c" },
+  const gridStyle: React.CSSProperties = {
+    display: "inline-flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: isMobile ? "3px" : "5px",
   };
 
-  // スタイルを決定する関数
-  const getButtonStyle = (key: string, matchResult: Record<string, string>) => {
-    // EnterとDelete用のスタイル
-    if (key === "Enter" || key === "Delete") {
-      return {
-        ...buttonStyle,
-        ...enterAndDeleteButtonStyle,
-        ...matchStyles[matchResult[key]], // matchResultからスタイルを適用
-      };
-    }
-
-    // 通常キー用のスタイル
-    return {
-      ...buttonStyle,
-      ...matchStyles[matchResult[key]], // matchResultからスタイルを適用
-    };
+  const rowStyle: React.CSSProperties = {
+    display: "flex",
+    gap: isMobile ? "3px" : "5px",
   };
 
   return (
-    // mapによりキーボードtable作成
-    <table id="keyboard-row" style={keyboardStyle}>
-      <tbody>
-        <tr>
-          {props.keyLayout.map((key, i) => (
-            <td id="alphabet-key" key={i}>
-              {/* EnterとDeleteのときのみstyleを変更 */}
-              <button
-                value={key}
-                onClick={handleClick}
-                style={getButtonStyle(key, props.alphabetMatch)}
-              >
-                {key}
-              </button>
-            </td>
-          ))}
-        </tr>
-      </tbody>
-    </table>
-  );
-};
-
-export const Keyboard = (props: appProps) => {
-  const upKeyLayout: string[] = [
-    "Q",
-    "W",
-    "E",
-    "R",
-    "T",
-    "Y",
-    "U",
-    "I",
-    "O",
-    "P",
-  ];
-  const middleKeyLayout: string[] = [
-    "A",
-    "S",
-    "D",
-    "F",
-    "G",
-    "H",
-    "J",
-    "K",
-    "L",
-  ];
-  const downKeyLayout: string[] = [
-    "Enter",
-    "Z",
-    "X",
-    "C",
-    "V",
-    "B",
-    "N",
-    "M",
-    "Delete",
-  ];
-
-  return (
-    <div className="Keyboard">
-      <KeyboardRow
-        round={props.round}
-        setRound={props.setRound}
-        columncnt={props.columncnt}
-        setColumncnt={props.setColumncnt}
-        answerList={props.answerList}
-        setAnswerList={props.setAnswerList}
-        keyLayout={upKeyLayout}
-        setJudge={props.setJudge}
-        alphabetMatch={props.alphabetMatch}
-        gameState={props.gameState}
-        isLoadFinished={props.isLoadFinished}
-      />
-      <KeyboardRow
-        round={props.round}
-        setRound={props.setRound}
-        columncnt={props.columncnt}
-        setColumncnt={props.setColumncnt}
-        answerList={props.answerList}
-        setAnswerList={props.setAnswerList}
-        keyLayout={middleKeyLayout}
-        setJudge={props.setJudge}
-        alphabetMatch={props.alphabetMatch}
-        gameState={props.gameState}
-        isLoadFinished={props.isLoadFinished}
-      />
-      <KeyboardRow
-        round={props.round}
-        setRound={props.setRound}
-        columncnt={props.columncnt}
-        setColumncnt={props.setColumncnt}
-        answerList={props.answerList}
-        setAnswerList={props.setAnswerList}
-        keyLayout={downKeyLayout}
-        setJudge={props.setJudge}
-        alphabetMatch={props.alphabetMatch}
-        gameState={props.gameState}
-        isLoadFinished={props.isLoadFinished}
-      />
+    <div className="Keyboard" style={{ textAlign: "center", marginTop: "8px" }}>
+      <div style={gridStyle}>
+        {kanaGrid.map((row, rowIdx) => (
+          <div key={rowIdx} style={rowStyle}>
+            {row.map((kana, colIdx) =>
+              kana === "" ? (
+                <div key={colIdx} style={{ ...btnBase, visibility: "hidden" }} />
+              ) : (
+                <button
+                  key={colIdx}
+                  onClick={() => handleClick(kana)}
+                  style={getKanaStyle(kana)}
+                >
+                  {kana}
+                </button>
+              )
+            )}
+          </div>
+        ))}
+        <div style={{ ...rowStyle, marginTop: isMobile ? "4px" : "6px" }}>
+          <button style={actionBtnStyle} onClick={() => handleClick("Delete")}>
+            Delete
+          </button>
+          <button style={actionBtnStyle} onClick={() => handleClick("Enter")}>
+            Enter
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
