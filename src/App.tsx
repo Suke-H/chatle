@@ -9,7 +9,7 @@ import { AlphabetMatch } from "./interfaces/AlphabetMatch";
 import { GameState } from "./types/GameState";
 
 import { pushedEnterProcess } from "./game_logics/pushedEnterProcess";
-import { getTodaysWord } from "./utils/getTodaysWord";
+import { getStaticTodaysWord } from "./utils/getStaticTodaysWord";
 import { makeGameResultText } from "./utils/makeGameResultText";
 
 import { saveGameData, loadGameData, LoadDataSetters } from "./load/saveAndLoad";
@@ -63,7 +63,7 @@ export const App = (): JSX.Element => {
   // 初回レンダリング時
   useEffect(() => {
     const fetchData = async () => {
-      await getTodaysWord(setCorrectAnswer, setTodaysNo);
+      getStaticTodaysWord(setCorrectAnswer, setTodaysNo);
     };
   
     fetchData();
@@ -75,7 +75,7 @@ export const App = (): JSX.Element => {
 
     // debug
     // resetGameDataInLocal();
-  
+
     const loadDataSetters: LoadDataSetters = {
       setAnswerList: setAnswerList,
       setMatchList: setMatchList,
@@ -83,12 +83,12 @@ export const App = (): JSX.Element => {
       setRound: setRound,
       setAlphabetMatch: setAlphabetMatch,
     };
-  
+
     // todaysNo と correctAnswer が更新されていることを前提にロード処理を呼び出し
     loadGameData(todaysNo, correctAnswer, loadDataSetters);
     // ロード完了
     setIsLoadFinished(true);
-  
+
   }, [todaysNo]); // todaysNoが変更されたときに実行される
 
   // Enterを押した際
@@ -104,27 +104,13 @@ export const App = (): JSX.Element => {
       setMatchList,
       setAlphabetMatch,
       setGameState
-    ).then((isValid) => {
-      /* 単語が妥当でない場合 */
-      if (!isValid) {
-        alert("データセットに存在しない単語です");
-
-        // 回答欄を1行リセット
-        setAnswerList((prevState) =>
-          prevState.map((row, index) =>
-            index === round - 1 ? Array(5).fill("") : row
-          )
-        );
-        setColumncnt(0); // 列番号を0にリセット
-      } else {
-
+    ).then(() => {
       /* 問題ない場合 */
-        setRound(round + 1); // 次の行へ移行
-        setColumncnt(0); // 列番号を0にリセット
+      setRound(round + 1); // 次の行へ移行
+      setColumncnt(0); // 列番号を0にリセット
 
-        // セーブ処理
-        saveGameData(todaysNo, answerList);
-      }
+      // セーブ処理
+      saveGameData(todaysNo, answerList);
     });
 
     setJudge(false);
