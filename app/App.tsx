@@ -9,7 +9,6 @@ import { AlphabetMatch } from "./interfaces/AlphabetMatch";
 import { GameState } from "./types/GameState";
 
 import { pushedEnterProcess } from "./game_logics/pushedEnterProcess";
-import { getStaticTodaysWord } from "./utils/getStaticTodaysWord";
 import { makeGameResultText } from "./utils/makeGameResultText";
 
 import { saveGameData, loadGameData, LoadDataSetters } from "./load/saveAndLoad";
@@ -17,7 +16,12 @@ import { saveGameData, loadGameData, LoadDataSetters } from "./load/saveAndLoad"
 // debug
 // import { resetGameDataInLocal } from "./utils/saveAndLoadInLocalStorage";
 
-export const App = (): JSX.Element => {
+interface AppProps {
+  correctAnswer: string;
+  todaysNo: number;
+}
+
+export const App = ({ correctAnswer, todaysNo }: AppProps): JSX.Element => {
   // （リスト初期化）
   const initAnswerList: string[][] = new Array(6);
   for (let i = 0; i < 6; i++) {
@@ -41,10 +45,6 @@ export const App = (): JSX.Element => {
 
   /* State */
 
-  // APIから取得するデータ
-  const [todaysNo, setTodaysNo] = useState<number>(0); // 本日のお題番号
-  const [correctAnswer, setCorrectAnswer] = useState<string>(""); // 今日の単語
-
   // セーブが必要なState
   const [answerList, setAnswerList] = useState<string[][]>(initAnswerList); // 回答欄の文字列
 
@@ -60,15 +60,6 @@ export const App = (): JSX.Element => {
   const [columncnt, setColumncnt] = useState(0); // 現在の列番号
   const [isLoadFinished, setIsLoadFinished] = useState<boolean>(false); // ロードが完了したか
 
-  // 初回レンダリング時
-  useEffect(() => {
-    const fetchData = async () => {
-      getStaticTodaysWord(setCorrectAnswer, setTodaysNo);
-    };
-  
-    fetchData();
-  }, []); // コンポーネントがマウントされたときに一度だけ実行される
-  
   useEffect(() => {
     // todaysNoが更新されたときに実行する処理
     if (todaysNo === 0) return; // 初期値の場合は処理をスキップ

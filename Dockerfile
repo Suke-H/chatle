@@ -1,35 +1,23 @@
 # Stage 1: Build
 FROM node:20.11.1-alpine AS builder
 
-# 作業ディレクトリを設定
 WORKDIR /app
 
-# パッケージファイルをコピー
 COPY package.json package-lock.json ./
-
-# 依存関係をインストール
 RUN npm install
 
-# プロジェクトファイルをコピー
 COPY . .
-
-# プロジェクトをビルド
 RUN npm run build
 
-# Stage 2: Serve
-FROM nginx:alpine
+# Stage 2: Production
+FROM node:20.11.1-alpine
 
-# Nginxのデフォルト設定を削除
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-# ビルドされたファイルをコピー
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
+COPY package.json package-lock.json ./
+RUN npm install --omit=dev
 
-# Nginx設定ファイルをコピー
-COPY default.conf /etc/nginx/conf.d/default.conf
-
-# コンテナを起動するコマンド
-CMD ["nginx", "-g", "daemon off;"]
-
-# Nginxが使用するポートを公開
-EXPOSE 8080
+EXPOSE 3000
+CMD ["npm", "start"]
