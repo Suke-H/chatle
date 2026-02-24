@@ -1,7 +1,9 @@
-export const getStaticTodaysWord = (
+export const getStaticTodaysWord = async (
     setCorrectAnswer: React.Dispatch<React.SetStateAction<string>>,
     setTodaysNo: React.Dispatch<React.SetStateAction<number>>
 ) => {
-    setCorrectAnswer("おむらいす");
-    setTodaysNo(1);
+    const res = await fetch("/api/word");
+    const data = await res.json() as { word: string; no: number };
+    setCorrectAnswer(data.word);
+    setTodaysNo(data.no);
 };

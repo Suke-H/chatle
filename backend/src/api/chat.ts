@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { getTodaysWord } from "./word";
 
 const chat = new Hono();
 
@@ -12,9 +13,7 @@ const model = genai.getGenerativeModel({
     responseSchema: {
       type: SchemaType.OBJECT,
       properties: {
-        score: {
-          type: SchemaType.INTEGER,
-        },
+        score: { type: SchemaType.INTEGER },
       },
       required: ["score"],
     },
@@ -22,13 +21,17 @@ const model = genai.getGenerativeModel({
 });
 
 chat.post("/", async (c) => {
+  const { text } = await c.req.json<{ text: string }>();
+  const { word } = getTodaysWord();
+
   const response = await model.generateContent(
-    "この文章はポジティブですか？「今日はとても良い天気で気分が最高です！」\n" +
-    "0=完全にNo, 10=完全にYes で答えてください。"
+    `「${word}は${text}ですか？」に対し、0~10の10段階評価で回答してください。` +
+    `0は100%No, 10は100%Yes。` +
+    `10段階あるのでまずはYes/Noかを判断することで、0~5/6~10に分ける。` +
+    `ここから段階評価をすること（0と10は完全一致/不一致なので慎重になること）`
   );
 
   const result = JSON.parse(response.response.text()) as { score: number };
-
   return c.json({ score: result.score });
 });
 

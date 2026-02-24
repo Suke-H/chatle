@@ -36,10 +36,12 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
     const text = input.trim();
     if (!text || loading) return;
 
+    const sentence = `それは${text}ですか？`;
+
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: text,
+      content: sentence,
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -47,11 +49,10 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
     setLoading(true);
 
     try {
-      // TODO: バックエンドのエンドポイントに合わせて変更
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMsg] }),
+        body: JSON.stringify({ text: sentence }),
       });
       const data = await res.json() as { score: number };
 
@@ -186,30 +187,28 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
             px: 1.5,
             py: 1,
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             gap: 0.5,
           }}
         >
+          <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+            それは
+          </Typography>
           <TextField
-            fullWidth
-            multiline
-            maxRows={3}
             size="small"
-            placeholder="メッセージを入力..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={loading}
             sx={{ "& fieldset": { borderRadius: 2 } }}
           />
+          <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+            ですか？
+          </Typography>
           <IconButton
             onClick={sendMessage}
             disabled={!input.trim() || loading}
-            sx={{
-              mb: 0.5,
-              color: "#585858",
-              "&:disabled": { color: "#ccc" },
-            }}
+            sx={{ color: "#585858", "&:disabled": { color: "#ccc" } }}
           >
             <SendIcon />
           </IconButton>

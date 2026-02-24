@@ -65,7 +65,7 @@ export const App = (): JSX.Element => {
   // 初回レンダリング時
   useEffect(() => {
     const fetchData = async () => {
-      getStaticTodaysWord(setCorrectAnswer, setTodaysNo);
+      await getStaticTodaysWord(setCorrectAnswer, setTodaysNo);
     };
   
     fetchData();
