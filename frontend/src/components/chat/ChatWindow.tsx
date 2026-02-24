@@ -53,12 +53,12 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
-      const data = await res.json();
+      const data = await res.json() as { score: number };
 
       const assistantMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: data.reply,
+        content: `${data.score}`,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch {
