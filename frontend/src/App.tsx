@@ -4,6 +4,7 @@ import { Answer } from "./components/answer";
 import { Keyboard } from "./components/keyboard";
 import { Notes } from "./components/notes";
 import { ShareResultButton } from "./components/ShareResultButton";
+import { ChatButton, ChatWindow } from "./components/chat";
 
 import { AlphabetMatch } from "./interfaces/AlphabetMatch";
 import { GameState } from "./types/GameState";
@@ -59,6 +60,7 @@ export const App = (): JSX.Element => {
   const [judge, setJudge] = useState<boolean>(false); // Enterを押したか
   const [columncnt, setColumncnt] = useState(0); // 現在の列番号
   const [isLoadFinished, setIsLoadFinished] = useState<boolean>(false); // ロードが完了したか
+  const [chatOpen, setChatOpen] = useState<boolean>(false); // チャットの開閉
 
   // 初回レンダリング時
   useEffect(() => {
@@ -133,6 +135,8 @@ export const App = (): JSX.Element => {
       />
       <ShareResultButton resultText={makeGameResultText(matchList, todaysNo)} />
       <Notes />
+      <ChatButton open={chatOpen} onClick={() => setChatOpen((prev) => !prev)} />
+      <ChatWindow open={chatOpen} />
     </div>
   );
 };
