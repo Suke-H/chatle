@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import chat from "./api/chat";
 import word from "./api/word";
+import similarity from "./api/similarity";
 
 const app = new Hono();
 
@@ -13,6 +14,7 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.route("/api/chat", chat);
 app.route("/api/word", word);
+app.route("/api/similarity", similarity);
 
 const port = 3000;
 console.log(`Server is running on port ${port}`);

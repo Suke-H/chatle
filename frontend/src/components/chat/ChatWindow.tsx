@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 import SendIcon from "@mui/icons-material/Send";
+import Button from "@mui/material/Button";
 
 type Role = "user" | "assistant";
 
@@ -25,6 +26,7 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"Q" | "A">("Q");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // 新しいメッセージが追加されたら自動スクロール
@@ -36,12 +38,10 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
     const text = input.trim();
     if (!text || loading) return;
 
-    const sentence = `それは${text}ですか？`;
-
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: sentence,
+      content: text,
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -49,10 +49,11 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
+      const endpoint = mode === "Q" ? "/api/chat" : "/api/similarity";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: sentence }),
+        body: JSON.stringify({ text }),
       });
       const data = await res.json() as { score: number };
 
@@ -90,13 +91,15 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
         sx={{
           position: "fixed",
           bottom: 90,
-          right: 24,
-          width: 360,
+          right: { xs: 8, sm: 24 },
+          width: { xs: "calc(100vw - 16px)", sm: 360 },
+          maxWidth: 360,
           height: 480,
           display: "flex",
           flexDirection: "column",
           borderRadius: 3,
           overflow: "hidden",
+          zIndex: 1000,
         }}
       >
         {/* ヘッダー */}
@@ -191,6 +194,40 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
             gap: 0.5,
           }}
         >
+          <Button
+            variant={mode === "Q" ? "contained" : "outlined"}
+            size="small"
+            onClick={() => setMode("Q")}
+            sx={{
+              minWidth: 0,
+              px: 1,
+              color: mode === "Q" ? "#fff" : "#585858",
+              backgroundColor: mode === "Q" ? "#585858" : "transparent",
+              borderColor: "#585858",
+              "&:hover": {
+                backgroundColor: mode === "Q" ? "#404040" : "#f5f5f5",
+              },
+            }}
+          >
+            Q?
+          </Button>
+          <Button
+            variant={mode === "A" ? "contained" : "outlined"}
+            size="small"
+            onClick={() => setMode("A")}
+            sx={{
+              minWidth: 0,
+              px: 1,
+              color: mode === "A" ? "#fff" : "#538d4e",
+              backgroundColor: mode === "A" ? "#538d4e" : "transparent",
+              borderColor: "#538d4e",
+              "&:hover": {
+                backgroundColor: mode === "A" ? "#3a6b35" : "#f5f5f5",
+              },
+            }}
+          >
+            A!
+          </Button>
           <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
             それは
           </Typography>
@@ -200,7 +237,7 @@ export const ChatWindow = ({ open }: Props): JSX.Element => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={loading}
-            sx={{ "& fieldset": { borderRadius: 2 } }}
+            sx={{ flex: 1, "& fieldset": { borderRadius: 2 } }}
           />
           <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
             ですか？

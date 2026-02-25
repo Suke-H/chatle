@@ -16,9 +16,10 @@ export const ChatButton = ({ open, onClick }: Props): JSX.Element => {
         sx={{
           position: "fixed",
           bottom: 24,
-          right: 24,
+          right: { xs: 16, sm: 24 },
           backgroundColor: "#585858",
           color: "#fff",
+          zIndex: 1001,
           "&:hover": {
             backgroundColor: "#3a3a3a",
           },
